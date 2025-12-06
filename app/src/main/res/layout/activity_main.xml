@@ -12,6 +12,15 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
+    <include
+        android:id="@+id/layout_progress"
+        layout="@layout/layout_progress"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|end"
+        android:layout_marginTop="40dp"
+        android:layout_marginEnd="16dp" />
+
     <LinearLayout
         android:id="@+id/bottom_sheet"
         android:layout_width="match_parent"
@@ -73,7 +82,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="16dp"
                     android:visibility="gone"
-                    android:text="Tutaj pojawi się bardzo długi opis atrakcji, który teraz można przewijać, jeśli nie mieści się na ekranie..."
+                    android:text="Opis..."
                     android:textSize="16sp"/>
 
                 <Button

@@ -49,7 +49,10 @@ import javax.xml.parsers.DocumentBuilderFactory;
 
 public class MainActivity extends AppCompatActivity {
 
-    private static final String TAG = "DEBUG_MAPA"; // Stała do filtrowania logów
+    private static final String TAG = "DEBUG_MAPA";
+
+    // Menedżer postępu (deklaracja)
+    private ProgressManager progressManager;
 
     private MapView map;
     private MyLocationNewOverlay locationOverlay;
@@ -75,7 +78,11 @@ public class MainActivity extends AppCompatActivity {
         Configuration.getInstance().load(ctx, PreferenceManager.getDefaultSharedPreferences(ctx));
         Configuration.getInstance().setUserAgentValue(getPackageName());
 
+        // Ważne: setContentView musi być przed inicjalizacją widoków
         setContentView(R.layout.activity_main);
+
+        // 1. Inicjalizacja ProgressManager (teraz bezpiecznie, bo widok istnieje)
+        progressManager = new ProgressManager(getWindow().getDecorView());
 
         Log.d(TAG, "=== Uruchamianie aplikacji ===");
 
@@ -84,7 +91,11 @@ public class MainActivity extends AppCompatActivity {
         map = findViewById(R.id.map);
         map.setMultiTouchControls(true);
 
+        // Wczytanie danych
         attractions = loadAttractions();
+
+        // 2. Pierwsze odświeżenie paska postępu na starcie
+        progressManager.updateProgress(attractions);
 
         setupBottomSheet();
         addMarkersToMap();
@@ -142,7 +153,6 @@ public class MainActivity extends AppCompatActivity {
             String fullPath = folderName + "/" + fileName;
 
             Log.d(TAG, ">>> Próba wczytania zdjęcia dla: " + attraction.name);
-            Log.d(TAG, "    Szukana ścieżka: " + fullPath);
 
             try {
                 // --- DEBUG: SPRAWDZENIE CZY PLIK ISTNIEJE W ASSETS ---
@@ -157,7 +167,6 @@ public class MainActivity extends AppCompatActivity {
                     }
                     if (!exists) {
                         Log.e(TAG, "❌ BŁĄD KRYTYCZNY: Pliku '" + fileName + "' NIE MA w folderze 'assets/" + folderName + "'!");
-                        Log.e(TAG, "    Dostępne pliki w tym folderze: " + Arrays.toString(filesInFolder));
                     } else {
                         Log.d(TAG, "✅ Plik '" + fileName + "' znaleziony na liście plików assets.");
                     }
@@ -184,8 +193,6 @@ public class MainActivity extends AppCompatActivity {
                 Log.e(TAG, "💥 WYJĄTEK (IO) przy ładowaniu zdjęcia: " + e.getMessage());
                 e.printStackTrace();
             }
-        } else {
-            // Log.d(TAG, "Atrakcja " + attraction.name + " nieodwiedzona - zostawiam domyślną ikonę.");
         }
     }
 
@@ -225,11 +232,16 @@ public class MainActivity extends AppCompatActivity {
 
             runOnUiThread(() -> {
                 Toast.makeText(this, "ODKRYTO: " + attraction.name + "!", Toast.LENGTH_LONG).show();
+
+                // Aktualizacja markera
                 Marker m = markersMap.get(attraction.name);
                 if (m != null) {
                     updateMarkerIcon(m, attraction);
                     map.invalidate();
                 }
+
+                // 3. Aktualizacja paska postępu po odkryciu
+                progressManager.updateProgress(attractions);
             });
         }
     }
@@ -239,17 +251,11 @@ public class MainActivity extends AppCompatActivity {
     private void setupBottomSheet() {
         bottomSheet = findViewById(R.id.bottom_sheet);
 
-        // --- NOWY KOD: OGRANICZENIE WYSOKOŚCI DO 2/3 EKRANU ---
-        // 1. Pobieramy całkowitą wysokość ekranu w pikselach
         int screenHeight = getResources().getDisplayMetrics().heightPixels;
-
-        // 2. Obliczamy 2/3 (ok. 66%) wysokości
         int targetHeight = (int) (screenHeight * 0.66);
 
-        // 3. Przypisujemy tę wysokość do widoku BottomSheet
         bottomSheet.getLayoutParams().height = targetHeight;
-        bottomSheet.requestLayout(); // Zatwierdzamy zmianę
-        // -----------------------------------------------------
+        bottomSheet.requestLayout();
 
         bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet);
         bottomSheetBehavior.setHideable(true);
@@ -264,13 +270,10 @@ public class MainActivity extends AppCompatActivity {
             if (sheetDescription.getVisibility() == View.GONE) {
                 sheetDescription.setVisibility(View.VISIBLE);
                 btnDetails.setText("UKRYJ OPIS");
-                // Teraz STATE_EXPANDED rozwinie się tylko do ustalonej przez nas wysokości (2/3)
                 bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
             } else {
                 sheetDescription.setVisibility(View.GONE);
                 btnDetails.setText("OPIS");
-                // Opcjonalnie: po ukryciu opisu można zwinąć panel do stanu COLLAPSED
-                // bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
             }
         });
 
@@ -279,19 +282,14 @@ public class MainActivity extends AppCompatActivity {
 
     private void showBottomSheet(Attraction attraction, boolean allowHide) {
         runOnUiThread(() -> {
-            // 1. Ustawiamy teksty
             sheetTitle.setText(attraction.name);
             sheetDescription.setText(attraction.description);
 
-            // 2. ZAWSZE pokazujemy opis i ustawiamy przycisk na "UKRYJ"
-            //    (niezależnie czy to automatyczne wejście, czy kliknięcie)
             sheetDescription.setVisibility(View.VISIBLE);
             btnDetails.setText("UKRYJ OPIS");
 
-            // 3. Ustawiamy czy można zamknąć panel (to jedyna różnica między trybami)
             bottomSheetBehavior.setHideable(allowHide);
 
-            // 4. Jeśli panel jest ukryty lub zwinięty, rozwiń go, żeby pokazać treść
             if (bottomSheetBehavior.getState() == BottomSheetBehavior.STATE_HIDDEN ||
                     bottomSheetBehavior.getState() == BottomSheetBehavior.STATE_COLLAPSED) {
                 bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
@@ -332,7 +330,6 @@ public class MainActivity extends AppCompatActivity {
                     for (Attraction a : attractions) {
                         double d = distance(current.getLatitude(), current.getLongitude(), a.lat, a.lon);
 
-                        // LOGOWANIE ODLEGŁOŚCI (żeby nie spamować, logujemy tylko jeśli < 100m)
                         if (d < 100) {
                             Log.d(TAG, "Jesteś blisko: " + a.name + " (" + (int)d + "m)");
                         }
