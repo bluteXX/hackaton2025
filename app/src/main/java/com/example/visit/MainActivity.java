@@ -238,6 +238,19 @@ public class MainActivity extends AppCompatActivity {
 
     private void setupBottomSheet() {
         bottomSheet = findViewById(R.id.bottom_sheet);
+
+        // --- NOWY KOD: OGRANICZENIE WYSOKOŚCI DO 2/3 EKRANU ---
+        // 1. Pobieramy całkowitą wysokość ekranu w pikselach
+        int screenHeight = getResources().getDisplayMetrics().heightPixels;
+
+        // 2. Obliczamy 2/3 (ok. 66%) wysokości
+        int targetHeight = (int) (screenHeight * 0.66);
+
+        // 3. Przypisujemy tę wysokość do widoku BottomSheet
+        bottomSheet.getLayoutParams().height = targetHeight;
+        bottomSheet.requestLayout(); // Zatwierdzamy zmianę
+        // -----------------------------------------------------
+
         bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet);
         bottomSheetBehavior.setHideable(true);
         bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
@@ -251,10 +264,13 @@ public class MainActivity extends AppCompatActivity {
             if (sheetDescription.getVisibility() == View.GONE) {
                 sheetDescription.setVisibility(View.VISIBLE);
                 btnDetails.setText("UKRYJ OPIS");
+                // Teraz STATE_EXPANDED rozwinie się tylko do ustalonej przez nas wysokości (2/3)
                 bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
             } else {
                 sheetDescription.setVisibility(View.GONE);
                 btnDetails.setText("OPIS");
+                // Opcjonalnie: po ukryciu opisu można zwinąć panel do stanu COLLAPSED
+                // bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
             }
         });
 
@@ -263,17 +279,22 @@ public class MainActivity extends AppCompatActivity {
 
     private void showBottomSheet(Attraction attraction, boolean allowHide) {
         runOnUiThread(() -> {
+            // 1. Ustawiamy teksty
             sheetTitle.setText(attraction.name);
             sheetDescription.setText(attraction.description);
 
-            if (allowHide) {
-                sheetDescription.setVisibility(View.VISIBLE);
-                btnDetails.setText("UKRYJ OPIS");
-            }
+            // 2. ZAWSZE pokazujemy opis i ustawiamy przycisk na "UKRYJ"
+            //    (niezależnie czy to automatyczne wejście, czy kliknięcie)
+            sheetDescription.setVisibility(View.VISIBLE);
+            btnDetails.setText("UKRYJ OPIS");
 
+            // 3. Ustawiamy czy można zamknąć panel (to jedyna różnica między trybami)
             bottomSheetBehavior.setHideable(allowHide);
-            if (bottomSheetBehavior.getState() == BottomSheetBehavior.STATE_HIDDEN) {
-                bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+
+            // 4. Jeśli panel jest ukryty lub zwinięty, rozwiń go, żeby pokazać treść
+            if (bottomSheetBehavior.getState() == BottomSheetBehavior.STATE_HIDDEN ||
+                    bottomSheetBehavior.getState() == BottomSheetBehavior.STATE_COLLAPSED) {
+                bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
             }
         });
     }

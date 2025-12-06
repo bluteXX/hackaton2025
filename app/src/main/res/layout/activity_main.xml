@@ -23,7 +23,6 @@
         app:behavior_peekHeight="100dp"
         app:behavior_hideable="true">
 
-        <!-- Pasek do chwytania -->
         <View
             android:layout_width="40dp"
             android:layout_height="4dp"
@@ -31,7 +30,6 @@
             android:layout_marginTop="8dp"
             android:background="#CCCCCC" />
 
-        <!-- Główny wiersz z tytułem i przyciskiem OPIS -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -58,31 +56,36 @@
                 style="@style/Widget.MaterialComponents.Button.OutlinedButton"/>
         </LinearLayout>
 
-        <!-- Sekcja z opisem i przyciskiem VR -->
-        <LinearLayout
+        <androidx.core.widget.NestedScrollView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="16dp">
+            android:fillViewport="true">
 
-            <TextView
-                android:id="@+id/sheet_description"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                android:visibility="gone"
-                android:text="Tutaj pojawi się opis atrakcji."
-                android:textSize="16sp"/>
+                android:orientation="vertical"
+                android:padding="16dp">
 
-            <Button
-                android:id="@+id/btn_vr"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:backgroundTint="#4CAF50"
-                android:textColor="#FFFFFF"
-                android:text="Zobacz w VR" />
+                <TextView
+                    android:id="@+id/sheet_description"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp"
+                    android:visibility="gone"
+                    android:text="Tutaj pojawi się bardzo długi opis atrakcji, który teraz można przewijać, jeśli nie mieści się na ekranie..."
+                    android:textSize="16sp"/>
 
-        </LinearLayout>
+                <Button
+                    android:id="@+id/btn_vr"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:backgroundTint="#4CAF50"
+                    android:textColor="#FFFFFF"
+                    android:text="Zobacz w VR" />
+
+            </LinearLayout>
+        </androidx.core.widget.NestedScrollView>
 
     </LinearLayout>
 
