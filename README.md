@@ -1,56 +1,50 @@
-# 🗺️ Visit App - Interaktywny Przewodnik Turystyczny
+🗺️ Visit App – Interactive Tourist Guide
 
-**Visit App** to mobilna aplikacja na system Android, która zachęca użytkowników do fizycznego eksplorowania miasta. Aplikacja łączy w sobie nawigację na żywo z mechaniką gry miejskiej — aby odkryć szczegóły i zdjęcia historycznych lub ciekawych miejsc, użytkownik musi fizycznie do nich podejść!
+Visit App is an Android mobile application that encourages users to physically explore the city. The app combines live navigation with urban game mechanics — to unlock details and photos of historical or interesting places, the user must physically approach them.
 
-## ✨ Główne funkcje
+✨ Key Features
+📍 Discovery Mechanic (Geofencing): Attractions on the map are initially locked. The app constantly tracks the user’s GPS position. When you get within 50 meters, the location is unlocked.
+🗺️ Interactive Map (OpenStreetMap): Uses the osmdroid library to render maps offline/online without Google Maps API fees.
+🖼️ Dynamic Markers: After discovering a location, the standard map marker changes into a circular thumbnail showing a photo of the place.
+📊 Progress Tracking: A visual indicator (Circular Progress Indicator) shows how many locations have already been visited (e.g., "3/10").
+💾 Persistent Storage: Discovered locations are saved in device memory (SharedPreferences), so progress is not lost after restarting the app.
+📑 Information Panel (Bottom Sheet): A slide-up panel presenting the name, detailed description, and optional features (e.g., planned VR mode).
+🚶 Famous Person Path: A dedicated map mode that hides standard attractions and focuses on a special themed route.
+🛠️ Architecture and Code
 
-* **📍 Mechanika odkrywania (Geofencing):** Atrakcje na mapie są początkowo zablokowane. Aplikacja stale śledzi pozycję GPS użytkownika. Gdy podejdziesz do miejsca na odległość **poniżej 50 metrów**, punkt zostaje odblokowany.
-* **🗺️ Interaktywna mapa (OpenStreetMap):** Wykorzystanie biblioteki `osmdroid` do renderowania mapy offline/online bez opłat za API Google Maps.
-* **🖼️ Dynamiczne markery:** Po odkryciu lokalizacji, standardowy znacznik na mapie zmienia się w okrągłą miniaturkę ze zdjęciem danego miejsca.
-* **📊 Śledzenie postępów:** Wizualny pasek (Circular Progress Indicator) pokazujący, ile miejsc z puli zostało już odwiedzonych (np. "3/10").
-* **💾 Trwały zapis (Zapisywanie stanu):** Odkryte miejsca są zapisywane w pamięci urządzenia (`SharedPreferences`), więc postęp nie znika po restarcie aplikacji.
-* **📑 Panel Informacyjny (Bottom Sheet):** Wysuwany z dołu ekranu panel, który prezentuje nazwę, opis szczegółowy oraz opcjonalne funkcje (np. planowany tryb VR).
-* **🚶 Ścieżka Znanej Osoby:** Dedykowany tryb mapy pozwalający na ukrycie standardowych atrakcji i skupienie się na specjalnie wyznaczonej ścieżce tematycznej.
+The project is divided into single-responsibility managers (Single Responsibility Principle), which simplifies code maintenance and expansion:
 
-## 🛠️ Architektura i Kod
+MainActivity – The core of the app; connects all modules, manages GPS permissions, and runs a background thread checking the distance to attractions.
+MapManager – Responsible for osmdroid integration, adding markers, centering the camera on the user, and updating icons.
+AttractionsRepository – Data layer; loads attractions from the attractions.xml file (from the assets folder) and manages saved states in SharedPreferences.
+BottomSheetManager – Handles the logic of the sliding information panel.
+ProgressManager – Updates the UI (percentage and text indicators) based on visited locations.
+BitmapHelper – Utility class that processes raw images into clean, circular icons with a white border.
+FamousPathManager – Manages the visibility of the special themed path on the map.
+💻 Technologies and Libraries
+Language: Java
+Platform: Android (minimum API adjusted for modern devices)
+Map: osmdroid – a powerful alternative to Google Maps
+UI Components: Material Design (BottomSheetBehavior, CircularProgressIndicator)
+Data Parsing: Standard XML libraries (DOM DocumentBuilder)
+🚀 How to Run the Project
+Clone this repository to your computer.
+Open the project in Android Studio.
+Make sure the following are present in app/src/main/assets/:
+attractions.xml file with location data.
+zdjecia/ folder containing images referenced in the XML file.
+Build the project and run it on a physical Android device (GPS features work best on a real phone, although the emulator allows route simulation).
+Grant location tracking permissions.
+📝 Example XML Structure (attractions.xml)
 
-Projekt został podzielony na menedżery o pojedynczej odpowiedzialności (Single Responsibility Principle), co ułatwia zarządzanie i rozwój kodu:
+The application expects the following data structure to load points onto the map:
 
-* `MainActivity` – Serce aplikacji; spina wszystkie moduły, zarządza uprawnieniami GPS i uruchamia w tle wątek sprawdzający dystans do atrakcji.
-* `MapManager` – Odpowiada za integrację z `osmdroid`, nakładanie markerów, centrowanie kamery na użytkowniku oraz podmianę ikon.
-* `AttractionsRepository` – Warstwa danych; wczytuje listę atrakcji z pliku `attractions.xml` (z folderu `assets`) i zarządza zapisanymi stanami w `SharedPreferences`.
-* `BottomSheetManager` – Zarządza logiką wysuwanego panelu z opisami miejsc.
-* `ProgressManager` – Aktualizuje interfejs użytkownika (wskaźnik procentowy i tekstowy) na podstawie liczby odwiedzonych miejsc.
-* `BitmapHelper` – Klasa narzędziowa obrabiająca surowe zdjęcia do postaci ładnych, okrągłych ikon z białą obwódką.
-* `FamousPathManager` – Zarządza widocznością specjalnej ścieżki tematycznej na mapie.
-
-## 💻 Technologie i Biblioteki
-
-* **Język:** Java
-* **Platforma:** Android (Min. API dostosowane do nowoczesnych urządzeń)
-* **Mapa:** [osmdroid](https://github.com/osmdroid/osmdroid) - potężna alternatywa dla Google Maps
-* **UI Components:** Material Design (BottomSheetBehavior, CircularProgressIndicator)
-* **Parsowanie danych:** Standardowe biblioteki XML (DOM DocumentBuilder)
-
-## 🚀 Jak uruchomić projekt
-
-1. Sklonuj to repozytorium na swój komputer.
-2. Otwórz projekt w **Android Studio**.
-3. Upewnij się, że w folderze `app/src/main/assets/` znajdują się:
-   * Plik `attractions.xml` z danymi miejsc.
-   * Folder `zdjecia/` zawierający grafiki, do których odwołuje się plik XML.
-4. Zbuduj projekt i uruchom go na fizycznym urządzeniu z systemem Android (funkcje GPS działają najlepiej na prawdziwym telefonie, choć emulator pozwala na symulowanie trasy).
-5. Zaakceptuj uprawnienia do śledzenia lokalizacji.
-
-## 📝 Przykładowa struktura pliku XML (`attractions.xml`)
-Aplikacja oczekuje następującej struktury danych do załadowania punktów na mapie:
-```xml
 <attractions>
     <attraction>
         <name>Rynek Główny</name>
         <lat>50.06143</lat>
         <lon>19.93658</lon>
-        <description>Serce miasta, piękne miejsce pełne historii.</description>
+        <description>The heart of the city, a beautiful place full of history.</description>
         <photo>rynek.jpg</photo>
     </attraction>
-    </attractions>
+</attractions>
